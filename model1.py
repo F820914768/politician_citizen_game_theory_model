@@ -7,9 +7,10 @@ Created on Mon May  4 01:18:42 2020
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 def generate_ideology():
-    x = np.random.normal(0.5, 0.2)
+    x = np.random.lognormal(0, 0.3)/2
     if x > 1:
         x = 1
     elif x < 0:
@@ -21,7 +22,7 @@ class Politician:
         self.country = country
         self.country.add_politician(self)
         
-        self.ideology = random.random()
+        self.ideology = generate_ideology()
         self.num_vote = 0
         self.poll_result = 0
         
@@ -50,7 +51,7 @@ class Politician:
             self.take_action(self.previous_action)
         
     def take_action(self, action):
-        self.ideology += action; print(action)
+        self.ideology += action
         if self.ideology > 1:
             self.ideology = 1
         elif self.ideology < 0:
@@ -150,16 +151,18 @@ class Citizen:
         
 if __name__ == '__main__':
     country = Country()
-    for i in range(7000):
+    for i in range(5000):
         Citizen(country)
         
-    for i in range(4):
+    for i in range(5):
         Politician(country)
         
-    for i in range(100):
+    for i in tqdm(range(200)):
         country.public_opinion_poll()
         
+    plt.xlim(0, 1)
     country.hist()
     plt.show()
+    plt.xlim(0, 1)
     country.hist_citizen()
         
