@@ -27,24 +27,39 @@ class Politician:
         
         self.history_poll_result = []
         self.previous_action = random.choice([-1, 1])
+        
+        self.is_first = False
     
     def judge(self):
         self.history_poll_result.append(self.poll_result)
         
-        if len(self.history_poll_result) == 1:
-            action = (random.random() - 0.5) * 1
-            self.ideology += action
-            self.previous_action = 1 if action >= 0 else -1
+        if self.is_first:
             return None
         
-        if self.history_poll_result[-2] - self.history_poll_result[-1] < 0:
+        if len(self.history_poll_result) == 1:
+            action = (random.random() - 0.5)/40
+            self.take_action(action)
+            self.previous_action = action
+            return None
+        
+        if self.history_poll_result[-2] - self.history_poll_result[-1] >= 0:
             action = self.previous_action * (-1) 
-            self.ideology += action
-            self.previous_action = 1 if action >= 0 else -1        
+            self.take_action(action)
+            self.previous_action = action       
         else:
-            self.ideology += self.previous_action
-            
-            
+            self.take_action(self.previous_action)
+        
+    def take_action(self, action):
+        self.ideology += action; print(action)
+        if self.ideology > 1:
+            self.ideology = 1
+        elif self.ideology < 0:
+            self.ideology = 0
+    
+    
+    
+    
+    
     
 class Country:
     def __init__(self):
@@ -70,7 +85,13 @@ class Country:
 
         for citizen in self.citizens:
             citizen.opinion()
-            
+        
+        polls = []
+        for politician in self.politicians:
+            polls.append(politician.poll_result)
+        first_politician = self.politicians[np.argmax(polls)]
+        first_politician.is_first = True
+        
         for politician in self.politicians:
             politician.judge()
 
@@ -86,6 +107,13 @@ class Country:
         for citizen in self.citizens:
             h.append(citizen.ideology)
         plt.hist(h)       
+    
+    
+    
+    
+    
+    
+    
     
 class Citizen:
     def __init__(self, country):
@@ -128,7 +156,7 @@ if __name__ == '__main__':
     for i in range(4):
         Politician(country)
         
-    for i in range(10):
+    for i in range(100):
         country.public_opinion_poll()
         
     country.hist()
